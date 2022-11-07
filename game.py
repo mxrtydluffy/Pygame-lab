@@ -44,6 +44,10 @@ target_y = 0
 
 # TODO: Add variables for the "enemy" character
 
+# Enemy Variables
+enemy_x = 250
+enemy_y = 0
+
 # Other variables
 velocity = 3
 points = 0
@@ -72,6 +76,17 @@ def draw_text(text, color, font_size, x, y):
     font = pygame.font.SysFont(None, font_size)
     img = font.render(text, True, color)
     screen.blit(img, (x, y))
+
+# Need to define when enemy eats player
+def is_eaten(x1, y1, x2, y2, width, height):
+    if (x1 >= x2 + width) or (x2 >= x1 + width):
+        return False
+    
+    # If one enemy is above the other
+    if (y1 >= y2 + height) or (y2 >= y1 + height):
+        return False
+  
+    return True
 
 ################################################################################
 # GAME LOOP
@@ -104,6 +119,7 @@ while running:
     target_y += velocity
 
     # TODO: Update the enemy's y position based on its velocity
+    enemy_y += velocity
 
     # If target went off the screen, reset it
     if target_y > SCREEN_HEIGHT: 
@@ -111,6 +127,9 @@ while running:
         target_x = random.random() * (SCREEN_WIDTH - CHARACTER_WIDTH)
 
     # TODO: If enemy went off the screen, reset it
+    if enemy_y > SCREEN_HEIGHT:
+        enemy_y = 0
+        enemy_x = random.random() * (SCREEN_WIDTH - CHARACTER_WIDTH)
 
     # If player collides with target, reset it & increment points
     if is_colliding(player_x, player_y, target_x, target_y, CHARACTER_WIDTH, CHARACTER_HEIGHT):
@@ -119,6 +138,10 @@ while running:
         target_x = random.random() * (SCREEN_WIDTH - CHARACTER_WIDTH)
 
     # TODO: If player collides with enemy, reset it & set points to 0
+    if is_eaten(player_x, player_y, enemy_x, enemy_y, CHARACTER_WIDTH, CHARACTER_HEIGHT):
+        points -= 1
+        enemy_y = 0
+        enemy_x = random.random() * (SCREEN_WIDTH - CHARACTER_WIDTH)
 
     # Fill screen with white
     screen.fill(WHITE)
@@ -130,6 +153,7 @@ while running:
     pygame.draw.rect(screen, GREEN, (target_x, target_y, CHARACTER_WIDTH, CHARACTER_HEIGHT))
 
     # TODO: Draw the enemy as a red square
+    pygame.draw.rect(screen, RED, (enemy_x, enemy_y, CHARACTER_WIDTH, CHARACTER_HEIGHT))
 
     # Draw the points
     draw_text(text=f'Points: {points}', color=BLACK, font_size=24, x=20, y=20)
